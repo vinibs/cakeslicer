@@ -48,18 +48,25 @@ def _parse_rules(interaction: Interaction, rules: dict) -> dict:
         elif not isinstance(properties["type"], RuleTypes):
             raise ValueError(messages.type_of_rule_must_be_rule_types(var_name))
 
-        type = properties["type"]
-        options = properties["options"] if "options" in properties else None
+        prop_type = properties["type"]
+        options = (
+            properties["options"]
+            if prop_type == RuleTypes.choice and "options" in properties
+            else None
+        )
+
+        if options and not isinstance(options, list):
+            raise ValueError(messages.invalid_type_for_options)
 
         rule_value = _process_rule_value(
             interaction.ask_for(
                 var_name,
                 None,
-                type,
+                prop_type,
                 options,
                 properties["message"] if "message" in properties else None,
             ),
-            type,
+            prop_type,
             options,
         )
 
@@ -67,7 +74,7 @@ def _parse_rules(interaction: Interaction, rules: dict) -> dict:
 
         if "actions" in properties:
             actions_to_perform = _process_actions(
-                actions_to_perform, properties["actions"], type, rule_value
+                actions_to_perform, properties["actions"], prop_type, rule_value
             )
 
     return (rules_vars, actions_to_perform)

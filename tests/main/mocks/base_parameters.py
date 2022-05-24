@@ -60,6 +60,7 @@ def mocked_inputs(prompt_text: str) -> str:
         "- country: ": "brazil",
         "- children_count: ": "3",
         "- pi_value: ": "3.141592653589793",
+        "- int_pi_value: ": "3",
     }
 
     return prompt_input_map[prompt_text]

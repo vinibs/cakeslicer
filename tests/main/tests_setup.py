@@ -375,7 +375,7 @@ def test_setup_properties_runs_an_integer_action_defined_in_a_dict_if_its_key_ma
     assert children_3_action_str in properties["ACTIONS"][Actions.include]
 
 
-def test_setup_properties_runs_an_float_action_defined_in_a_dict_if_its_key_matches_the_attributes_value(
+def test_setup_properties_runs_a_float_action_defined_in_a_dict_if_its_key_matches_the_attributes_value(
     monkeypatch,
 ):
     monkeypatch.setattr("builtins.input", mocked_inputs)
@@ -407,6 +407,43 @@ def test_setup_properties_runs_an_float_action_defined_in_a_dict_if_its_key_matc
 
     assert short_pi_action_str not in properties["ACTIONS"][Actions.cmd]
     assert long_pi_action_str in properties["ACTIONS"][Actions.include]
+
+
+def test_setup_properties_runs_a_float_action_if_it_receives_an_integer_value(
+    monkeypatch,
+):
+    monkeypatch.setattr("builtins.input", mocked_inputs)
+
+    comment_delimiters = ["//", "#"]
+    tool_prefix = "cakeslicer"
+
+    integer_pi_action_str = "echo 'Integer Pi!'"
+    short_pi_action_str = "echo 'Short Pi!'"
+    long_pi_action_str = "echo 'Long Pi!'"
+
+    rules = {
+        "int_pi_value": {
+            "type": RuleTypes.float,
+            "actions": {
+                "3": (Actions.cmd, integer_pi_action_str),
+                "3.1415": (Actions.cmd, short_pi_action_str),
+                "3.141592653589793": (Actions.include, long_pi_action_str),
+            },
+        },
+    }
+
+    properties = setup_properties(
+        {},
+        cli,
+        attributes=mocked_attributes,
+        comment_delimiters=comment_delimiters,
+        tool_prefix=tool_prefix,
+        rules=rules,
+    )
+
+    assert short_pi_action_str not in properties["ACTIONS"][Actions.cmd]
+    assert long_pi_action_str not in properties["ACTIONS"][Actions.include]
+    assert integer_pi_action_str in properties["ACTIONS"][Actions.cmd]
 
 
 def test_setup_properties_runs_a_boolean_action_defined_in_a_dict_if_its_key_matches_the_attributes_value(
@@ -482,6 +519,43 @@ def test_setup_properties_runs_a_choice_action_defined_in_a_dict_if_its_key_matc
     assert apache_action_str in properties["ACTIONS"][Actions.cmd]
 
 
+def test_setup_properties_runs_a_choice_action_defined_in_a_dict_if_its_key_matches_the_option_index_on_the_list(
+    monkeypatch,
+):
+    monkeypatch.setattr("builtins.input", mocked_inputs)
+
+    comment_delimiters = ["//", "#"]
+    tool_prefix = "cakeslicer"
+
+    mit_action_str = "MIT action string"
+    cc_action_str = "CC action string"
+    apache_action_str = "Apache action string"
+
+    rules = {
+        "license": {
+            "type": RuleTypes.choice,
+            "options": {1: "MIT", 2: "CC", 3: "Apache"},
+            "actions": {
+                0: (Actions.cmd, mit_action_str),
+                1: (Actions.cmd, cc_action_str),
+                2: (Actions.cmd, apache_action_str),
+            },
+        },
+    }
+
+    with pytest.raises(ValueError) as error:
+        setup_properties(
+            {},
+            cli,
+            attributes=mocked_attributes,
+            comment_delimiters=comment_delimiters,
+            tool_prefix=tool_prefix,
+            rules=rules,
+        )
+
+    assert str(error.value) == messages.invalid_type_for_options
+
+
 def test_setup_properties_doesnt_run_any_action_defined_in_a_dict_if_the_attributes_value_doesnt_match_any_dict_key(
     monkeypatch,
 ):
@@ -514,6 +588,43 @@ def test_setup_properties_doesnt_run_any_action_defined_in_a_dict_if_the_attribu
 
     assert usa_action_str not in properties["ACTIONS"][Actions.cmd]
     assert germany_action_str not in properties["ACTIONS"][Actions.cmd]
+    assert properties["ACTIONS"][Actions.cmd] == []
+
+
+def test_setup_properties_doesnt_run_any_action_defined_in_a_dict_if_the_dict_is_inside_a_list(
+    monkeypatch,
+):
+    monkeypatch.setattr("builtins.input", mocked_inputs)
+
+    comment_delimiters = ["//", "#"]
+    tool_prefix = "cakeslicer"
+
+    brazil_action_str = "echo 'Brazil!'"
+    usa_action_str = "echo 'USA!'"
+
+    rules = {
+        "country": {
+            "type": RuleTypes.string,
+            "actions": [
+                {
+                    "brazil": (Actions.cmd, brazil_action_str),
+                    "usa": (Actions.cmd, usa_action_str),
+                }
+            ],
+        },
+    }
+
+    properties = setup_properties(
+        {},
+        cli,
+        attributes=mocked_attributes,
+        comment_delimiters=comment_delimiters,
+        tool_prefix=tool_prefix,
+        rules=rules,
+    )
+
+    assert usa_action_str not in properties["ACTIONS"][Actions.cmd]
+    assert brazil_action_str not in properties["ACTIONS"][Actions.cmd]
     assert properties["ACTIONS"][Actions.cmd] == []
 
 
@@ -557,6 +668,86 @@ def test_setup_properties_runs_all_actions_defined_in_a_list_from_a_dict_when_it
         first_false_action_str,
         second_false_action_str,
     ]
+
+
+def test_setup_properties_ignores_options_attribute_if_rule_type_is_not_choice(
+    monkeypatch,
+):
+    monkeypatch.setattr("builtins.input", mocked_inputs)
+
+    comment_delimiters = ["//", "#"]
+    tool_prefix = "cakeslicer"
+
+    true_action_str = "./somenodeproject"
+    first_false_action_str = "echo 'fail'"
+    second_false_action_str = "echo 'fail again'"
+
+    rules = {
+        "node_project": {
+            "message": "Use node project?",
+            "type": RuleTypes.bool,
+            "actions": {
+                True: (Actions.include, true_action_str),
+                False: [
+                    (Actions.cmd, first_false_action_str),
+                    (Actions.cmd, second_false_action_str),
+                ],
+            },
+            "options": ["true", "false", "t", "f"],
+        },
+    }
+
+    try:
+        setup_properties(
+            {},
+            cli,
+            attributes=mocked_attributes,
+            comment_delimiters=comment_delimiters,
+            tool_prefix=tool_prefix,
+            rules=rules,
+        )
+    except Exception:
+        assert False, "An exception was raised"
+
+
+def test_setup_properties_ignores_malformed_options_attribute_if_rule_type_is_not_choice(
+    monkeypatch,
+):
+    monkeypatch.setattr("builtins.input", mocked_inputs)
+
+    comment_delimiters = ["//", "#"]
+    tool_prefix = "cakeslicer"
+
+    true_action_str = "./somenodeproject"
+    first_false_action_str = "echo 'fail'"
+    second_false_action_str = "echo 'fail again'"
+
+    rules = {
+        "node_project": {
+            "message": "Use node project?",
+            "type": RuleTypes.bool,
+            "actions": {
+                True: (Actions.include, true_action_str),
+                False: [
+                    (Actions.cmd, first_false_action_str),
+                    (Actions.cmd, second_false_action_str),
+                ],
+            },
+            "options": 276,
+        },
+    }
+
+    try:
+        setup_properties(
+            {},
+            cli,
+            attributes=mocked_attributes,
+            comment_delimiters=comment_delimiters,
+            tool_prefix=tool_prefix,
+            rules=rules,
+        )
+    except Exception:
+        assert False, "An exception was raised"
 
 
 def test_setup_properties_runs_all_actions_defined_in_a_list_for_the_true_value_of_a_boolean_rule(

@@ -25,3 +25,4 @@ class SetupErrorMessages(AttributeDict):
         lambda key, rule_name: f'Required key "{key}" not present on rule "{rule_name}"'
     )
     invalid_type_for_action_definition = "Invalid type for action definition. Each action definition should be a tuple, that may be inside a list or a dict"
+    invalid_type_for_options = "Choice rule's options must be set in a list"

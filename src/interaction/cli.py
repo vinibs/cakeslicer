@@ -1,6 +1,6 @@
 from ..core.interfaces import Interaction
 from ..core.enums import RuleTypes, BooleanStrValues
-from ..core.errors import CliErrorMessages as messages
+from ..core.errors import CliErrorMessages as messages, ValueError
 
 
 class Cli(Interaction):

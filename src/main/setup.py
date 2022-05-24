@@ -1,6 +1,6 @@
 from ...src.core.interfaces import Interaction
 from ...src.core.enums import RuleTypes, Actions, BooleanStrValues
-from ...src.core.errors import SetupErrorMessages as messages
+from ...src.core.errors import SetupErrorMessages as messages, KeyError, ValueError
 
 
 def setup_properties(
@@ -43,7 +43,7 @@ def _parse_rules(interaction: Interaction, rules: dict) -> dict:
 
     for (var_name, properties) in rules.items():
         if not "type" in properties:
-            raise Exception(messages.required_key_not_present_on_rule("type", var_name))
+            raise KeyError(messages.required_key_not_present_on_rule("type", var_name))
 
         elif not isinstance(properties["type"], RuleTypes):
             raise ValueError(messages.type_of_rule_must_be_rule_types(var_name))

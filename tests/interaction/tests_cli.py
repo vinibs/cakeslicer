@@ -1,5 +1,5 @@
 from cakeslicer.src.core.enums import RuleTypes
-from cakeslicer.src.core.errors import CliErrorMessages as messages
+from cakeslicer.src.core.errors import CliErrorMessages as messages, ValueError
 from cakeslicer.src.interaction import cli
 import pytest
 

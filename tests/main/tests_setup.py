@@ -1,5 +1,9 @@
 from cakeslicer.src.core.enums import Actions, RuleTypes
-from cakeslicer.src.core.errors import SetupErrorMessages as messages
+from cakeslicer.src.core.errors import (
+    SetupErrorMessages as messages,
+    KeyError,
+    ValueError,
+)
 from cakeslicer.src.main.setup import setup_properties
 from cakeslicer.src.interaction import cli
 from mocks.base_parameters import mocked_attributes, mocked_rules, mocked_inputs
@@ -168,7 +172,7 @@ def test_setup_properties_fails_if_an_action_doesnt_have_the_required_type_key(
         },
     }
 
-    with pytest.raises(Exception) as error:
+    with pytest.raises(KeyError) as error:
         setup_properties(
             {},
             cli,

@@ -1,4 +1,5 @@
 from cakeslicer.src.core.enums import RuleTypes
+from cakeslicer.src.core.errors import CliErrorMessages as messages
 from cakeslicer.src.interaction import cli
 import pytest
 
@@ -64,7 +65,7 @@ def test_ask_for_fails_without_default_value_and_no_input(
     with pytest.raises(ValueError) as error:
         answer = cli.ask_for(attribute, None)
 
-    assert str(error.value) == f'No value for attribute "{attribute}"'
+    assert str(error.value) == messages.no_value_for_attribute(attribute)
 
 
 def test_ask_for_successfully_with_passing_type_and_with_default_value_and_no_input(
@@ -198,7 +199,7 @@ def test_ask_for_fails_with_int_type_and_with_invalid_inputted_value(
     with pytest.raises(ValueError) as error:
         cli.ask_for(attribute, None, RuleTypes.integer)
 
-    assert str(error.value) == 'Inappropriate value for "integer" type'
+    assert str(error.value) == messages.inappropriate_value_for_type("integer")
 
 
 def test_ask_for_successfully_with_float_type_with_default_value_and_no_input(
@@ -252,7 +253,7 @@ def test_ask_for_fails_with_float_type_and_with_invalid_inputted_value(
     with pytest.raises(ValueError) as error:
         cli.ask_for(attribute, None, RuleTypes.float)
 
-    assert str(error.value) == 'Inappropriate value for "float" type'
+    assert str(error.value) == messages.inappropriate_value_for_type("float")
 
 
 @pytest.mark.parametrize(
@@ -313,7 +314,7 @@ def test_ask_for_fails_with_boolean_type_and_invalid_inputted_value(
     with pytest.raises(ValueError) as error:
         cli.ask_for(attribute, None, RuleTypes.bool)
 
-    assert str(error.value) == 'Inappropriate value for "bool" type'
+    assert str(error.value) == messages.inappropriate_value_for_type("bool")
 
 
 @pytest.mark.parametrize(
@@ -465,8 +466,8 @@ def test_ask_for_fails_with_choice_type_with_default_value_not_matching_option_c
     with pytest.raises(ValueError) as error:
         cli.ask_for(attribute, default, RuleTypes.choice, ["MIT", "CC", "Apache"])
 
-    assert (
-        str(error.value) == f'Default value "{default}" not present among the options'
+    assert str(error.value) == messages.default_value_not_present_among_the_options(
+        default
     )
 
 
@@ -483,8 +484,8 @@ def test_ask_for_fails_with_choice_type_with_default_value_not_present_among_opt
     with pytest.raises(ValueError) as error:
         cli.ask_for(attribute, default, RuleTypes.choice, ["MIT", "CC", "Apache"])
 
-    assert (
-        str(error.value) == f'Default value "{default}" not present among the options'
+    assert str(error.value) == messages.default_value_not_present_among_the_options(
+        default
     )
 
 
@@ -499,7 +500,7 @@ def test_ask_for_fails_with_choice_type_with_empty_set_of_options(
     with pytest.raises(ValueError) as error:
         cli.ask_for(attribute, "1", RuleTypes.choice, [])
 
-    assert str(error.value) == "No available options to ask for"
+    assert str(error.value) == messages.no_available_options
 
 
 def test_ask_for_fails_with_choice_type_with_options_set_to_none(
@@ -513,7 +514,7 @@ def test_ask_for_fails_with_choice_type_with_options_set_to_none(
     with pytest.raises(ValueError) as error:
         cli.ask_for(attribute, "1", RuleTypes.choice, None)
 
-    assert str(error.value) == "No available options to ask for"
+    assert str(error.value) == messages.no_available_options
 
 
 def test_ask_for_fails_with_choice_type_with_inputted_value_not_among_the_options(
@@ -527,7 +528,7 @@ def test_ask_for_fails_with_choice_type_with_inputted_value_not_among_the_option
     with pytest.raises(ValueError) as error:
         cli.ask_for(attribute, None, RuleTypes.choice, ["MIT", "CC", "Apache"])
 
-    assert str(error.value) == 'Inappropriate value for "choice" type'
+    assert str(error.value) == messages.inappropriate_value_for_type("choice")
 
 
 @pytest.mark.parametrize(
@@ -642,14 +643,16 @@ def test_validate_choice_params_fails_when_there_is_no_options():
     with pytest.raises(ValueError) as error:
         cli._validate_choice_params("default", None)
 
-    assert str(error.value) == "No available options to ask for"
+    assert str(error.value) == messages.no_available_options
 
 
 def test_validate_choice_params_fails_when_the_default_value_is_not_among_the_options():
     with pytest.raises(ValueError) as error:
         cli._validate_choice_params("default", ["not the default", "some other option"])
 
-    assert str(error.value) == 'Default value "default" not present among the options'
+    assert str(error.value) == messages.default_value_not_present_among_the_options(
+        "default"
+    )
 
 
 def test_validate_choice_params_doesnt_fail_when_there_are_options_and_no_default_value():

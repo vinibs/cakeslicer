@@ -1,4 +1,5 @@
 from cakeslicer.src.core.enums import Actions, RuleTypes
+from cakeslicer.src.core.errors import SetupErrorMessages as messages
 from cakeslicer.src.main.setup import setup_properties
 from cakeslicer.src.interaction import cli
 from mocks.base_parameters import mocked_attributes, mocked_rules, mocked_inputs
@@ -60,10 +61,7 @@ def test_setup_properties_fails_if_an_action_that_is_not_a_tuple_is_passed(monke
             rules=rules,
         )
 
-        assert (
-            str(error)
-            == "Invalid type for action definition. Each action definition should be a tuple, that may be inside a list or a dict"
-        )
+    assert str(error.value) == messages.invalid_type_for_action_definition
 
 
 def test_setup_properties_fails_if_an_action_that_does_not_end_up_being_a_tuple_is_passed(
@@ -92,10 +90,7 @@ def test_setup_properties_fails_if_an_action_that_does_not_end_up_being_a_tuple_
             rules=rules,
         )
 
-        assert (
-            str(error)
-            == "Invalid type for action definition. Each action definition should be a tuple, that may be inside a list or a dict"
-        )
+    assert str(error.value) == messages.invalid_type_for_action_definition
 
 
 def test_setup_properties_fails_if_an_action_that_has_more_than_3_levels_until_it_is_a_tuple_is_passed(
@@ -127,10 +122,7 @@ def test_setup_properties_fails_if_an_action_that_has_more_than_3_levels_until_i
             rules=rules,
         )
 
-        assert (
-            str(error)
-            == "Invalid type for action definition. Each action definition should be a tuple, that may be inside a list or a dict"
-        )
+    assert str(error.value) == messages.invalid_type_for_action_definition
 
 
 def test_setup_properties_fails_if_an_action_tuple_doesnt_start_with_an_action_type_value(
@@ -159,9 +151,7 @@ def test_setup_properties_fails_if_an_action_tuple_doesnt_start_with_an_action_t
             rules=rules,
         )
 
-        assert (
-            str(error) == "The first value of an action's tuple must be of Actions type"
-        )
+    assert str(error.value) == messages.first_tuple_value_must_be_an_action
 
 
 def test_setup_properties_fails_if_an_action_doesnt_have_the_required_type_key(
@@ -188,8 +178,8 @@ def test_setup_properties_fails_if_an_action_doesnt_have_the_required_type_key(
             rules=rules,
         )
 
-    assert (
-        str(error.value) == 'Required key "type" not present on rule "python_project"'
+    assert str(error.value) == messages.required_key_not_present_on_rule(
+        "type", "python_project"
     )
 
 
@@ -215,7 +205,9 @@ def test_setup_properties_fails_if_an_actions_type_is_not_of_ruletypes_type(
             rules=rules,
         )
 
-    assert str(error.value) == 'Type of rule "python_project" must be of type RuleTypes'
+    assert str(error.value) == messages.type_of_rule_must_be_rule_types(
+        "python_project"
+    )
 
 
 def test_setup_properties_runs_an_action_defined_in_a_simple_tuple_if_the_rule_is_boolean_and_its_value_is_true(

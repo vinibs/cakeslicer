@@ -1,5 +1,6 @@
 from ..core.interfaces import Interaction
 from ..core.enums import RuleTypes, BooleanStrValues
+from ..core.errors import CliErrorMessages as messages
 
 
 class Cli(Interaction):
@@ -18,7 +19,7 @@ class Cli(Interaction):
         value = input(input_message)
 
         if value == "" and not default_value:
-            raise ValueError(f'No value for attribute "{attribute}"')
+            raise ValueError(messages.no_value_for_attribute(attribute))
 
         return self._validate_input(default_value, value, type, options)
 
@@ -48,11 +49,11 @@ class Cli(Interaction):
 
     def _validate_choice_params(self, default_value: any, options: list):
         if options is None or options == []:
-            raise ValueError("No available options to ask for")
+            raise ValueError(messages.no_available_options)
 
         if default_value is not None and default_value not in options:
             raise ValueError(
-                f'Default value "{default_value}" not present among the options'
+                messages.default_value_not_present_among_the_options(default_value)
             )
 
     def _generate_choice_message(
@@ -97,8 +98,9 @@ class Cli(Interaction):
                 raise Exception
         except Exception:
             desired_type = str(type).replace("RuleTypes.", "")
-            error_message = f'Inappropriate value for "{desired_type}" type'
-            raise ValueError(error_message) from None
+            raise ValueError(
+                messages.inappropriate_value_for_type(desired_type)
+            ) from None
 
         return value
 

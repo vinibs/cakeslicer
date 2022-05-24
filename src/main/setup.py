@@ -1,5 +1,6 @@
 from ...src.core.interfaces import Interaction
 from ...src.core.enums import RuleTypes, Actions, BooleanStrValues
+from ...src.core.errors import SetupErrorMessages as messages
 
 
 def setup_properties(
@@ -42,10 +43,10 @@ def _parse_rules(interaction: Interaction, rules: dict) -> dict:
 
     for (var_name, properties) in rules.items():
         if not "type" in properties:
-            raise Exception(f'Required key "type" not present on rule "{var_name}"')
+            raise Exception(messages.required_key_not_present_on_rule("type", var_name))
 
         elif not isinstance(properties["type"], RuleTypes):
-            raise ValueError(f'Type of rule "{var_name}" must be of type RuleTypes')
+            raise ValueError(messages.type_of_rule_must_be_rule_types(var_name))
 
         type = properties["type"]
         options = properties["options"] if "options" in properties else None
@@ -94,9 +95,7 @@ def _process_actions(
     rule_type: RuleTypes,
     rule_value: any,
 ) -> dict:
-    error = ValueError(
-        "Invalid type for action definition. Each action definition should be a tuple, that may be inside a list or a dict"
-    )
+    error = ValueError(messages.invalid_type_for_action_definition)
 
     if isinstance(property_actions, dict):
         for value, action in property_actions.items():
@@ -136,7 +135,7 @@ def _process_actions(
 
 def _handle_action(actions_to_perform: dict, action: tuple):
     if not isinstance(action[0], Actions):
-        raise ValueError("The first value of an action's tuple must be of Actions type")
+        raise ValueError(messages.first_tuple_value_must_be_an_action)
 
     for index, item in enumerate(action):
         if index == 0:

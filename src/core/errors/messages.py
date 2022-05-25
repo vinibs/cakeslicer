@@ -14,6 +14,16 @@ class CliErrorMessages(AttributeDict):
     no_value_for_attribute = lambda attribute: f'No value for attribute "{attribute}"'
 
 
+class LocalFileHandlerErrorMessages(AttributeDict):
+    invalid_path = "Invalid path"
+    couldnt_read_file = "Couldn't read file contents"
+    couldnt_write_file = "Couldn't write file"
+    invalid_type_for_parameter = (
+        lambda parameter: f"Invalid type for {parameter} parameter"
+    )
+    failed_to_copy = lambda context: f"Failed to copy {context}"
+
+
 class SetupErrorMessages(AttributeDict):
     first_tuple_value_must_be_an_action = (
         "The first value of an action's tuple must be of Actions type"

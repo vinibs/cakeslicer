@@ -11,3 +11,11 @@ class KeyError(CustomException):
 
 class ValueError(CustomException):
     pass
+
+
+class FileReadingError(CustomException):
+    pass
+
+
+class CopyError(CustomException):
+    pass

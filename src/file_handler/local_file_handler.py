@@ -90,6 +90,10 @@ class LocalFileHandler(FileHandler):
         else:
             self._copy_directory(full_original_path, full_destination_path)
 
+    def createDirectory(self, directory_path: str) -> None:
+        # TODO
+        raise NotImplemented
+
     def _validate_existing_path(self, path: str) -> None:
         if not self.is_path(path):
             raise ValueError(messages.invalid_path)

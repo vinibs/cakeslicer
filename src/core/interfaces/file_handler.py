@@ -26,6 +26,10 @@ class FileHandler(ABC):
         raise NotImplemented
 
     @abstractmethod
+    def createDirectory(self, directory_path: str) -> None:
+        raise NotImplemented
+
+    @abstractmethod
     def _validate_existing_path(self, path: str) -> None:
         raise NotImplemented
 
